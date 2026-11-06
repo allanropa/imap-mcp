@@ -1,0 +1,4 @@
+[
+  {"subject_regex": "\\b(factura|recibo|comprobante|invoice|receipt)\\b"},
+  {"subject_regex": "\\b(movimiento|transferencia|transaction)\\b"}
+]
