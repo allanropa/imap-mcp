@@ -15,6 +15,8 @@ python -m unittest discover -s code -p 'test_*.py'
 
 Configura `IMAP_HOST`, `IMAP_USER` e `IMAP_PASSWORD` mediante el mecanismo de secretos de tu entorno; `IMAP_PORT` es opcional (993 por defecto). Usa una contraseña de aplicación si tu proveedor la requiere; solo se admite autenticación IMAP LOGIN, no OAuth. No pegues credenciales en el chat ni en archivos versionados. Inicia con `python code/server.py`.
 
+`.env.example` enumera las variables disponibles. Puedes copiarlo a `.env` y completar los valores, pero el servidor no carga ese archivo automáticamente: usa tu gestor de secretos o carga sus variables en el entorno antes de iniciar. No subas `.env` al repositorio.
+
 Por defecto escucha en `127.0.0.1:8000/mcp` mediante Streamable HTTP. `MCP_BIND_HOST`, `MCP_PORT` y `MCP_TRANSPORT` permiten modificarlo. `GET /health` solo indica que el proceso responde, no comprueba la cuenta.
 
 ## Herramientas
