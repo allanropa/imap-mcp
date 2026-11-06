@@ -7,6 +7,7 @@ from pydantic import Field
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from connector import IMAPClient
+from error_logging import log_tool_errors
 
 mcp = FastMCP("Correo IMAP", host=os.getenv("MCP_BIND_HOST", "127.0.0.1"), port=int(os.getenv("MCP_PORT", "8000")), stateless_http=True)
 client = IMAPClient()
@@ -19,7 +20,7 @@ async def health(request: Request) -> JSONResponse:
 
 
 def read_tool(fn):
-    return mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})(fn)
+    return mcp.tool(annotations={"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": True})(log_tool_errors(fn))
 
 
 @read_tool

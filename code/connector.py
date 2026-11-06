@@ -10,6 +10,7 @@ from email import policy
 from email.parser import BytesParser
 from email.header import decode_header, make_header
 from pathlib import Path
+from error_logging import logger
 
 
 class ConnectorError(Exception):
@@ -68,21 +69,29 @@ class IMAPClient:
         if not folder or any(c in folder for c in '\r\n\x00'):
             raise ValueError("Carpeta inválida")
         conn = None
+        stage = "conexion"
         try:
             conn = imaplib.IMAP4_SSL(self.host, self.port, ssl_context=ssl.create_default_context(), timeout=30)
+            stage = "autenticacion"
             conn.login(self.username, self.password)
             # Quote mailbox names to preserve spaces and prevent IMAP argument injection.
             mailbox = '"' + folder.replace('\\', '\\\\').replace('"', '\\"') + '"'
+            stage = "seleccion de carpeta"
             ok(conn.select(mailbox, readonly=True))
+            stage = "operacion IMAP"
             yield conn
         except (imaplib.IMAP4.error, OSError, EOFError) as exc:
+            logger.error("Error IMAP: cuenta=%s etapa=%s tipo=%s", "financiera" if self.prefix == "IMAP_FINANCIAL" else "normal", stage, type(exc).__name__)
             raise ConnectorError("Error de conexión o autenticación IMAP") from exc
+        except ConnectorError as exc:
+            logger.error("Error IMAP: cuenta=%s etapa=%s tipo=%s", "financiera" if self.prefix == "IMAP_FINANCIAL" else "normal", stage, type(exc).__name__)
+            raise
         finally:
             if conn is not None:
                 try:
                     conn.logout()
-                except (imaplib.IMAP4.error, OSError, EOFError):
-                    pass
+                except (imaplib.IMAP4.error, OSError, EOFError) as exc:
+                    logger.warning("Error IMAP al cerrar sesion: cuenta=%s tipo=%s", "financiera" if self.prefix == "IMAP_FINANCIAL" else "normal", type(exc).__name__)
 
     @staticmethod
     def uidvalidity(conn):

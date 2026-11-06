@@ -19,6 +19,8 @@ Configura `IMAP_HOST`, `IMAP_USER` e `IMAP_PASSWORD` para la cuenta normal y `IM
 
 Por defecto escucha en `127.0.0.1:8000/mcp` mediante Streamable HTTP. `MCP_BIND_HOST`, `MCP_PORT` y `MCP_TRANSPORT` permiten modificarlo. `GET /health` solo indica que el proceso responde, no comprueba la cuenta.
 
+Los errores de las herramientas se registran con el nombre de la operación y el tipo de excepción; los errores IMAP también indican la cuenta y la etapa. Se escriben en la salida de errores del proceso mediante el logging estándar de Python, sin registrar argumentos, credenciales ni contenido de correos. Los errores siguen propagándose al cliente MCP.
+
 ## Herramientas
 
 - `buscar_correos`: consulta la cuenta normal con fechas `desde` y `hasta` inclusivas (`YYYY-MM-DD`), fragmentos de remitente y asunto, estado `todos`, `leidos` o `no_leidos`, y carpeta (por defecto `INBOX`). Los filtros se combinan con AND, sin distinguir mayúsculas en remitente y asunto.
