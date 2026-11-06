@@ -25,13 +25,13 @@ def read_tool(fn):
 
 @read_tool
 def buscar_correos(desde: str | None = None, hasta: str | None = None, remitente: str | None = None, asunto: str | None = None, estado: Literal["todos", "leidos", "no_leidos"] = "todos", carpeta: str = "INBOX", limite: Annotated[int, Field(ge=1, le=100)] = 20, offset: Annotated[int, Field(ge=0)] = 0) -> dict:
-    """Busca en la cuenta normal por fecha IMAP inclusiva (YYYY-MM-DD), remitente, asunto y estado."""
+    """Busca en la cuenta normal por fecha IMAP inclusiva (YYYY-MM-DD), remitente, asunto y estado. Para leer un resultado pasa su uid, uidvalidity, carpeta y cuenta a leer_correo. Usa siguiente_offset para continuar."""
     return client.search(desde, hasta, remitente, asunto, estado, carpeta, limite, offset)
 
 
 @read_tool
 def leer_correo(uid: str, uidvalidity: str, carpeta: str = "INBOX", cuenta: Literal["normal", "financiera"] = "normal") -> dict:
-    """Lee el mensaje sin marcarlo como leído. Usa cuenta financiera para resultados de buscar_correos_financieros."""
+    """Lee el mensaje sin marcarlo como leído. Pasa uid, uidvalidity, carpeta y cuenta del resultado de búsqueda. Para resultados financieros cuenta debe ser financiera; si se omite se usa normal."""
     if cuenta not in ("normal", "financiera"):
         raise ValueError("Cuenta inválida")
     return (financial_client if cuenta == "financiera" else client).read(uid, uidvalidity, carpeta)
@@ -39,7 +39,7 @@ def leer_correo(uid: str, uidvalidity: str, carpeta: str = "INBOX", cuenta: Lite
 
 @read_tool
 def buscar_correos_financieros(desde: str | None = None, hasta: str | None = None, estado: Literal["todos", "leidos", "no_leidos"] = "todos", carpeta: str = "INBOX", limite: Annotated[int, Field(ge=1, le=100)] = 20, offset: Annotated[int, Field(ge=0)] = 0) -> dict:
-    """Busca en la cuenta financiera usando las reglas locales; usa siguiente_offset para continuar."""
+    """Busca en la cuenta financiera usando las reglas locales. Para leer un resultado llama a leer_correo con su uid, uidvalidity, carpeta y cuenta="financiera". Usa siguiente_offset para continuar."""
     return financial_client.search(desde=desde, hasta=hasta, estado=estado, carpeta=carpeta, limite=limite, offset=offset, financial=True)
 
 

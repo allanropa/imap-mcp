@@ -49,6 +49,13 @@ class ClientTests(unittest.TestCase):
         self.assertIn("01-Jan-2026", self.fake.calls[0][1])
         self.assertIn("UNSEEN", self.fake.calls[0][1])
 
+    def test_search_results_identify_the_account(self):
+        self.client.rules = []
+        self.assertEqual(self.client.search()["resultados"][0]["cuenta"], "normal")
+        self.client.prefix = "IMAP_FINANCIAL"
+        result = self.client.search(financial=True)
+        self.assertEqual(result["resultados"][0]["cuenta"], "financiera")
+
     def test_pagination_and_filter(self):
         result = self.client.search(asunto="otro", limite=1)
         self.assertEqual(result["resultados"][0]["uid"], "1")
