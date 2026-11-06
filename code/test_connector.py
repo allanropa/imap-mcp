@@ -2,6 +2,7 @@ import json
 import tempfile
 import unittest
 from contextlib import contextmanager
+from unittest.mock import patch
 from connector import ConnectorError, IMAPClient, load_rules
 
 
@@ -70,6 +71,21 @@ class ClientTests(unittest.TestCase):
             file.flush()
             with self.assertRaises(ValueError):
                 load_rules(file.name)
+
+    def test_separate_account_configuration(self):
+        env = {"IMAP_HOST": "normal.example", "IMAP_USER": "normal", "IMAP_PASSWORD": "one", "IMAP_PORT": "993", "IMAP_FINANCIAL_HOST": "finance.example", "IMAP_FINANCIAL_USER": "finance", "IMAP_FINANCIAL_PASSWORD": "two", "IMAP_FINANCIAL_PORT": "1993"}
+        with patch.dict("os.environ", env, clear=True):
+            normal = IMAPClient()
+            financial = IMAPClient("IMAP_FINANCIAL")
+        self.assertEqual((normal.host, normal.port, normal.username, normal.password), ("normal.example", 993, "normal", "one"))
+        self.assertEqual((financial.host, financial.port, financial.username, financial.password), ("finance.example", 1993, "finance", "two"))
+
+    def test_financial_account_never_falls_back_to_normal(self):
+        with patch.dict("os.environ", {"IMAP_HOST": "normal.example", "IMAP_USER": "normal", "IMAP_PASSWORD": "one"}, clear=True):
+            financial = IMAPClient("IMAP_FINANCIAL")
+            with self.assertRaisesRegex(ConnectorError, "IMAP_FINANCIAL_HOST"):
+                with financial.connection("INBOX"):
+                    pass
 
 
 if __name__ == "__main__":

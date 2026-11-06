@@ -52,18 +52,19 @@ def load_rules(path):
 
 
 class IMAPClient:
-    def __init__(self):
-        self.host = os.getenv("IMAP_HOST", "")
-        self.port = int(os.getenv("IMAP_PORT", "993"))
-        self.username = os.getenv("IMAP_USER", "")
-        self.password = os.getenv("IMAP_PASSWORD", "")
+    def __init__(self, prefix="IMAP"):
+        self.prefix = prefix
+        self.host = os.getenv(f"{prefix}_HOST", "")
+        self.port = int(os.getenv(f"{prefix}_PORT", "993"))
+        self.username = os.getenv(f"{prefix}_USER", "")
+        self.password = os.getenv(f"{prefix}_PASSWORD", "")
         self.rules_path = os.getenv("IMAP_FINANCIAL_RULES", str(Path(__file__).resolve().parent.parent / "financial_rules.json"))
         self.rules = load_rules(self.rules_path)
 
     @contextmanager
     def connection(self, folder):
         if not all((self.host, self.username, self.password)):
-            raise ConnectorError("Configura IMAP_HOST, IMAP_USER e IMAP_PASSWORD")
+            raise ConnectorError(f"Configura {self.prefix}_HOST, {self.prefix}_USER y {self.prefix}_PASSWORD")
         if not folder or any(c in folder for c in '\r\n\x00'):
             raise ValueError("Carpeta inválida")
         conn = None
