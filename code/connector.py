@@ -141,7 +141,7 @@ class IMAPClient:
                     continue
                 if asunto and asunto.casefold() not in subject.casefold():
                     continue
-                if financial and not any((not r.get("sender") or r["sender"].casefold() in sender.casefold()) and (not r.get("subject_regex") or re.search(r["subject_regex"], subject, re.I)) for r in self.rules):
+                if financial and self.rules and not any((not r.get("sender") or r["sender"].casefold() in sender.casefold()) and (not r.get("subject_regex") or re.search(r["subject_regex"], subject, re.I)) for r in self.rules):
                     continue
                 results.append({"uid": uid.decode("ascii"), "uidvalidity": validity, "carpeta": carpeta, "remitente": sender, "asunto": subject, "fecha": str(msg.get("Date", "")), "message_id": str(msg.get("Message-ID", "")), "leido": bool(re.search(rb"\\Seen\b", meta, re.I))})
                 if len(results) == limite:

@@ -42,6 +42,13 @@ class ClientTests(unittest.TestCase):
         self.assertIn("01-Feb-2026", self.fake.calls[0][1])
         self.assertIn("BODY.PEEK", self.fake.calls[1][1][1])
 
+    def test_empty_financial_rules_return_all_candidates(self):
+        self.client.rules = []
+        result = self.client.search(desde="2026-01-01", estado="no_leidos", financial=True)
+        self.assertEqual([x["uid"] for x in result["resultados"]], ["2", "1"])
+        self.assertIn("01-Jan-2026", self.fake.calls[0][1])
+        self.assertIn("UNSEEN", self.fake.calls[0][1])
+
     def test_pagination_and_filter(self):
         result = self.client.search(asunto="otro", limite=1)
         self.assertEqual(result["resultados"][0]["uid"], "1")
